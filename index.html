@@ -145,6 +145,43 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px;}
 .photo-upload-zone{border:2px dashed #2a2a28;border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;color:#555;font-size:13px;}.photo-upload-zone:hover{border-color:#444;background:#0a0a08;}
 .photo-upload-zone input{display:none;}.photo-btn-row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;}
 .hac-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#0c0c0a;border:1px solid #1e1e1c;border-radius:8px;margin-bottom:6px;}
+.tb-icon.away-on{background:#e8eef7;border-color:#3a5f9a88;color:var(--accent3);}
+.away-banner{display:none;background:linear-gradient(90deg,#3a5f9a,#4a6fa8);color:white;padding:11px 20px;align-items:center;justify-content:space-between;gap:14px;}
+.away-banner.show{display:flex;}
+.ab-left{display:flex;align-items:center;gap:11px;}
+.ab-icon{font-size:19px;}
+.ab-text{font-size:14px;font-weight:500;}
+.ab-sub{font-size:12px;opacity:0.75;margin-top:1px;}
+.ab-btn{padding:7px 16px;border-radius:8px;background:rgba(255,255,255,0.95);color:#3a5f9a;font-size:13px;font-weight:600;white-space:nowrap;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.panel-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:25px;margin-bottom:15px;background:#e8eef7;color:var(--accent3);}
+.panel-icon.green{background:#e4f2ec;color:var(--accent2);}
+.panel-body{font-size:14px;color:var(--ink2);line-height:1.65;margin-bottom:20px;}
+.panel-list{background:#faf7f0;border:1.5px solid var(--line);border-radius:10px;padding:13px 15px;margin-bottom:20px;}
+.pl-row{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink2);padding:4px 0;}
+.pl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.btn-blue{background:var(--accent3);color:white;font-weight:600;}
+.btn-green{background:var(--accent2);color:white;font-weight:600;}
+.btn-link{background:none;border:none;color:var(--ink3);font-size:12px;text-decoration:underline;padding:6px 0;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.away-opts{display:flex;flex-direction:column;gap:7px;}
+.away-opt{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:9px;border:1.5px solid var(--line);background:white;cursor:pointer;}
+.away-opt.sel{border-color:var(--accent3);background:#f4f7fc;}
+.away-opt.dis{opacity:0.4;cursor:not-allowed;}
+.ao-radio{width:17px;height:17px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;}
+.away-opt.sel .ao-radio{border-color:var(--accent3);}
+.away-opt.sel .ao-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent3);}
+.ao-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.ao-desc{font-size:11.5px;color:var(--ink3);line-height:1.5;}
+.sum-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:20px;}
+.sum-stat{background:#faf7f0;border:1.5px solid var(--line);border-radius:10px;padding:13px 11px;text-align:center;}
+.sum-num{font-family:'Playfair Display',serif;font-size:25px;font-weight:600;line-height:1;margin-bottom:4px;}
+.sum-lbl{font-size:10.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.4px;font-weight:600;}
+.sum-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3);margin:0 0 8px;}
+.sum-task{display:flex;align-items:center;gap:10px;padding:9px 12px;background:white;border:1.5px solid var(--line);border-radius:9px;margin-bottom:5px;}
+.sum-task-name{flex:1;font-size:13px;font-weight:500;}
+.sum-tag{font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:0.3px;}
+.sum-shift{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:12px;color:var(--ink3);}
+.sum-more{font-size:12px;color:var(--ink3);padding:4px 12px;}
+@media(max-width:600px){.away-banner{padding:9px 12px;}.ab-sub{display:none;}}
 @media(max-width:600px){.toolbar-wrap{padding:8px 10px 0;}.toolbar{padding:6px 8px;}.tb-date{display:none;}.tb-tab{padding:6px 10px;font-size:12px;}main{padding:10px 10px 40px;}.frow,.dp-row{grid-template-columns:1fr;}.modal{padding:18px;}.dash-grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -161,6 +198,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px;}
       <div class="tb-tab" onclick="showView('all')" id="vtab-all">All Tasks</div>
     </div>
     <div class="tb-right">
+      <div class="tb-icon" onclick="openAwayPanel()" title="Away mode" id="awayBtn" style="border-color:#3a5f9a55;color:var(--accent3);">&#9992;</div>
       <div class="tb-icon" onclick="launchPaprika()" title="Paprika Recipes">&#127798;&#65039;</div>
       <div class="tb-icon" onclick="goHome()" title="Home Screen" id="homeBtnTb">&#127968;</div>
       <div class="tb-sep"></div>
@@ -170,6 +208,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px;}
   </div>
 </div>
 <div class="sync-banner" id="syncBanner"></div>
+<div class="away-banner" id="awayBanner"><div class="ab-left"><span class="ab-icon">&#9992;</span><div><div class="ab-text" id="abText"></div><div class="ab-sub" id="abSub"></div></div></div><button class="ab-btn" onclick="returnHome()">We&#39;re back</button></div>
 
 <!-- HAMBURGER MENU -->
 <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
@@ -214,6 +253,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px;}
   <!-- ALL TASKS -->
   <div class="view" id="view-all">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h2 style="font-family:'Playfair Display',serif;font-size:20px;">All Tasks</h2></div>
+    <input class="fi" id="allSearch" placeholder="Search tasks..." oninput="renderAllTasks()" style="max-width:320px;margin-bottom:14px;">
     <div id="allTasksList"></div>
   </div>
 
@@ -267,6 +307,7 @@ create policy "anon full access" on homebase
     <div class="fg"><label class="fl">Task Name *</label><input class="fi" id="fName" placeholder="e.g. Take recycling bin out"></div>
     <div class="frow"><div class="fg"><label class="fl">Recurrence</label><select class="fs" id="fRecur" onchange="updateRecurFields()"><option value="once">One-off (specific date)</option><option value="weekly">Weekly (day of week)</option><option value="monthly">Monthly (day of month)</option><option value="yearly">Yearly</option><option value="custom">Every X days</option><option value="xweekly">Every X weeks (day of week)</option></select></div><div class="fg"><label class="fl">Assigned To</label><select class="fs" id="fAssignee"><option value="">Anyone</option></select></div></div>
     <div id="recurFields"></div>
+    <div id="awayModeField"></div>
     <div class="frow"><div class="fg"><label class="fl">Show N days early</label><input type="number" class="fi" id="fLeadTime" min="0" max="30" value="0"><div class="fhint">0 = only on due date</div></div><div class="fg"><label class="fl">Emoji</label><input class="fi" id="fEmoji" placeholder="&#127968;" maxlength="30"></div></div>
     <div class="fg"><label class="fl">Notes (optional)</label><textarea class="ft" id="fNotes" rows="2" placeholder="Extra details..."></textarea></div>
     <div class="modal-actions"><button class="btn btn-secondary" onclick="closeOverlay()" style="font-size:13px;padding:7px 14px;">Cancel</button><button class="btn btn-primary" onclick="saveTask()" style="font-size:13px;padding:7px 14px;">Save Task</button></div>
@@ -281,6 +322,20 @@ create policy "anon full access" on homebase
   </div>
 </div>
 
+<div class="overlay" id="awayPanel" onclick="if(event.target===this)closeAwayPanel()">
+  <div class="modal" style="width:440px;">
+    <div class="panel-icon">&#9992;</div>
+    <div class="modal-title">Going away?</div>
+    <div class="panel-body">HomeBase will hold your tasks while you&#39;re gone and tidy them up when you get back.</div>
+    <div class="panel-list">
+      <div class="pl-row"><div class="pl-dot" style="background:var(--accent2)"></div>Overdue alerts and lights stay off at home</div>
+      <div class="pl-row"><div class="pl-dot" style="background:var(--accent3)"></div>Tasks still visible from your phone</div>
+      <div class="pl-row"><div class="pl-dot" style="background:var(--warn)"></div>Backlog cleared up on your return</div>
+    </div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeAwayPanel()">Cancel</button><button class="btn btn-blue" onclick="startAway()">Set away mode</button></div>
+  </div>
+</div>
+<div class="overlay" id="returnSummary"><div class="modal" style="width:470px;" id="returnSummaryBody"></div></div>
 <!-- PHOTO FRAME -->
 <div class="photo-frame" id="photoFrame" onclick="hidePhotoFrame()">
   <img id="photoFrameImg" src="" alt="">
@@ -294,7 +349,8 @@ function customConfirm(msg,yesLabel='Delete'){return new Promise(resolve=>{_conf
 function confirmResolve(val){document.getElementById('confirmOverlay').classList.remove('open');if(_confirmCb){_confirmCb(val);_confirmCb=null;}}
 
 // STATE
-let S={tasks:[],members:[],settings:{defaultLeadTime:0},completions:{},haControls:[]};
+let S={tasks:[],members:[],settings:{defaultLeadTime:0},completions:{},haControls:[],skips:{},away:{active:false,since:null,lastReturn:null}};
+let awayUndoSnapshot=null;
 let CFG={sb:{url:'',key:''},ha:{url:'',token:''},cal:{clientId:'',refresh:15,calendars:[]}};
 let UI={filter:'all',editingId:null,calView:'today'};
 const COLORS=['#c84b2f','#2f7c5a','#3a5f9a','#d4873a','#7c3f9a','#3a8a8a','#9a3a5f'];
@@ -310,8 +366,8 @@ let syncTimer=null,pendingSync=false,lastSyncTime=0;
 function sbHeaders(){return{'Content-Type':'application/json','apikey':CFG.sb.key,'Authorization':'Bearer '+CFG.sb.key,'Prefer':'return=minimal'};}
 function sbUrl(path){return CFG.sb.url.replace(/\/$/,'')+'/rest/v1/'+path;}
 async function sbSetBatch(pairs){const rows=pairs.map(([key,value])=>({key,value,updated_at:new Date().toISOString()}));const r=await fetch(sbUrl('homebase'),{method:'POST',headers:{...sbHeaders(),'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});if(!r.ok)throw new Error('BATCH SET failed: '+r.status);}
-async function pullFromSupabase(){if(!CFG.sb.url||!CFG.sb.key)return false;const r=await fetch(sbUrl('homebase?select=key,value'),{headers:sbHeaders()});if(!r.ok)throw new Error('Pull failed: '+r.status);const rows=await r.json();const map={};rows.forEach(row=>map[row.key]=row.value);if(map.tasks)S.tasks=map.tasks;if(map.members)S.members=map.members;if(map.settings)S.settings={defaultLeadTime:0,...map.settings};if(map.completions)S.completions=map.completions;if(map.haControls)S.haControls=map.haControls;if(map.calendarDisplay){CFG.cal.calendars=map.calendarDisplay;saveCfg();}return true;}
-async function pushToSupabase(){if(!CFG.sb.url||!CFG.sb.key)return false;await sbSetBatch([['tasks',S.tasks],['members',S.members],['settings',S.settings],['completions',S.completions],['haControls',S.haControls||[]],['calendarDisplay',CFG.cal.calendars||[]]]);return true;}
+async function pullFromSupabase(){if(!CFG.sb.url||!CFG.sb.key)return false;const r=await fetch(sbUrl('homebase?select=key,value'),{headers:sbHeaders()});if(!r.ok)throw new Error('Pull failed: '+r.status);const rows=await r.json();const map={};rows.forEach(row=>map[row.key]=row.value);if(map.tasks)S.tasks=map.tasks;if(map.members)S.members=map.members;if(map.settings)S.settings={defaultLeadTime:0,...map.settings};if(map.completions)S.completions=map.completions;if(map.haControls)S.haControls=map.haControls;if(map.skips)S.skips=map.skips;if(map.away)S.away={active:false,since:null,lastReturn:null,...map.away};if(!S.skips)S.skips={};if(map.calendarDisplay){CFG.cal.calendars=map.calendarDisplay;saveCfg();}return true;}
+async function pushToSupabase(){if(!CFG.sb.url||!CFG.sb.key)return false;await sbSetBatch([['tasks',S.tasks],['members',S.members],['settings',S.settings],['completions',S.completions],['haControls',S.haControls||[]],['skips',S.skips||{}],['away',S.away||{active:false,since:null,lastReturn:null}],['calendarDisplay',CFG.cal.calendars||[]]]);return true;}
 function showBanner(msg,isErr=false){const b=document.getElementById('syncBanner');b.textContent=msg;b.className='sync-banner show'+(isErr?' err':'');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),isErr?6000:2500);}
 function setDbStatus(state,text){document.getElementById('dbDot').className='dot '+state;document.getElementById('dbTxt').textContent=text;}
 async function syncNow(){if(!CFG.sb.url||!CFG.sb.key){setDbStatus('warn','No DB');return;}try{setDbStatus('spin','Syncing...');await pullFromSupabase();pruneCompletions();setDbStatus('ok','Synced');lastSyncTime=Date.now();renderAll();renderCalendarSection();renderHaControls();fireAllWebhooks();}catch(e){setDbStatus('err','Sync err');showBanner('Sync failed: '+e.message,true);}}
@@ -323,7 +379,7 @@ async function clearAllData(){if(!await customConfirm('Delete ALL data?','Delete
 function saveSbSettings(){CFG.sb.url=(document.getElementById('sbUrl').value||'').trim();CFG.sb.key=(document.getElementById('sbKey').value||'').trim();saveCfg();if(CFG.sb.url&&CFG.sb.key)syncNow();}
 
 // COMPLETION PRUNING
-function pruneCompletions(){const cutoff=addDays(today(),-90);let pruned=false;for(const key of Object.keys(S.completions)){const m=key.match(/(\d{4}-\d{2}-\d{2})$/);if(m&&m[1]<cutoff){delete S.completions[key];pruned=true;}}if(pruned)scheduleSave();}
+function pruneCompletions(){const cutoff=awayScanFloor(today());let pruned=false;for(const key of Object.keys(S.completions)){const m=key.match(/(\d{4}-\d{2}-\d{2})$/);if(m&&m[1]<cutoff){delete S.completions[key];pruned=true;}}if(S.skips)for(const key of Object.keys(S.skips)){const m=key.match(/(\d{4}-\d{2}-\d{2})$/);if(m&&m[1]<cutoff){delete S.skips[key];pruned=true;}}if(pruned)scheduleSave();}
 
 // DATE UTILS - LOCAL timezone (no UTC shift)
 function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -331,6 +387,7 @@ function fmt(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'
 function addDays(ds,n){const d=new Date(ds+'T12:00:00');d.setDate(d.getDate()+n);return fmt(d);}
 function diffDays(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000);}
 function friendlyDate(ds){const d=diffDays(today(),ds);if(d===0)return'Today';if(d===-1)return'Yesterday';if(d===1)return'Tomorrow';if(d<0)return(-d)+' days ago';return'In '+d+' days';}
+function overdueLabel(ds,missed){const d=-diffDays(today(),ds);let base=(d===1)?'Due yesterday':'Due '+d+' days ago';if(missed&&missed>1)base+=' \u00b7 '+missed+' missed';return base;}
 function friendlyDateFull(ds){const d=diffDays(today(),ds),dateObj=new Date(ds+'T12:00:00'),dayName=DOW[dateObj.getDay()],dayNum=dateObj.getDate(),monthName=MONTHS[dateObj.getMonth()];if(d===0)return'Today';if(d===1)return'Tomorrow \u00b7 '+dayName+' '+dayNum+' '+monthName;if(d>1)return'Due in '+d+' days \u00b7 '+dayName+' '+dayNum+' '+monthName;if(d===-1)return'Due yesterday \u00b7 '+dayName+' '+dayNum+' '+monthName;return'Due '+(-d)+' days ago \u00b7 '+dayName+' '+dayNum+' '+monthName;}
 function monthDay(ds){const d=new Date(ds+'T12:00:00');return{m:d.getMonth(),day:d.getDate()};}
 function niceDate(ds){const d=new Date(ds+'T12:00:00');return DOW[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()];}
@@ -349,6 +406,8 @@ function getDueDatesInRange(task,rangeStart,rangeEnd){
 }
 function nextDueDate(task,fromDate){const results=getDueDatesInRange(task,fromDate,addDays(fromDate,400));return results.length?results[0]:null;}
 
+function awayScanFloor(t){let floor=addDays(t,-90);const c=[];if(S.away&&S.away.active&&S.away.since)c.push(S.away.since);if(S.away&&S.away.lastReturn&&S.away.lastReturn.since)c.push(S.away.lastReturn.since);for(const x of c){if(x&&x<floor)floor=x;}const hard=addDays(t,-730);if(floor<hard)floor=hard;return floor;}
+function isCleared(key){return !!S.completions[key]||!!(S.skips&&S.skips[key]);}
 function getTaskSections(filterMember){
   const t=today();const sec={overdue:[],today:[],upcoming:[]};
   S.tasks.forEach(task=>{
@@ -357,14 +416,14 @@ function getTaskSections(filterMember){
     // OVERDUE
     let overdueScanStart;
     if(task.recur==='once'){overdueScanStart=task.dueDate;}
-    else{overdueScanStart=task.createdAt&&task.createdAt>addDays(t,-90)?task.createdAt:addDays(t,-90);}
+    else{const fl=awayScanFloor(t);overdueScanStart=task.createdAt&&task.createdAt>fl?task.createdAt:fl;}
     const pastDates=getDueDatesInRange(task,overdueScanStart,addDays(t,-1));
-    for(let pi=pastDates.length-1;pi>=0;pi--){const due=pastDates[pi];const key=task.id+'_'+due;if(!S.completions[key]){sec.overdue.push({task,due,key});break;}}
+    const misses=pastDates.filter(d=>!isCleared(task.id+'_'+d));if(misses.length){const due=misses[0];sec.overdue.push({task,due,key:task.id+'_'+due,missed:misses.length,misses:misses});}
     // TODAY
     const todayDates=getDueDatesInRange(task,t,t);
     for(const due of todayDates){const key=task.id+'_'+due;if(!sec.overdue.find(x=>x.task.id===task.id&&x.due===due))sec.today.push({task,due,key,done:!!S.completions[key]});}
     // UPCOMING (only if lead time > 0)
-    if(lt>0){for(let i=1;i<=lt;i++){const futureDate=addDays(t,i);const futureDates=getDueDatesInRange(task,futureDate,futureDate);for(const due of futureDates){const key=task.id+'_'+due;if(!S.completions[key]&&!sec.overdue.find(x=>x.task.id===task.id&&x.due===due)&&!sec.today.find(x=>x.task.id===task.id&&x.due===due)&&!sec.upcoming.find(x=>x.task.id===task.id&&x.due===due))sec.upcoming.push({task,due,key});}}}
+    if(lt>0){for(let i=1;i<=lt;i++){const futureDate=addDays(t,i);const futureDates=getDueDatesInRange(task,futureDate,futureDate);for(const due of futureDates){const key=task.id+'_'+due;if(!isCleared(key)&&!sec.overdue.find(x=>x.task.id===task.id&&x.due===due)&&!sec.today.find(x=>x.task.id===task.id&&x.due===due)&&!sec.upcoming.find(x=>x.task.id===task.id&&x.due===due))sec.upcoming.push({task,due,key});}}}
   });
   sec.overdue.sort((a,b)=>b.due.localeCompare(a.due));
   sec.upcoming.sort((a,b)=>a.due.localeCompare(b.due));
@@ -374,8 +433,8 @@ function getTaskSections(filterMember){
 // HOME ASSISTANT WEBHOOKS
 const OVERDUE_WH='homebase_overdue';
 function whId(mid){return 'homebase_member_'+mid;}
-function buildMemberPayload(mid){const sec=getTaskSections(mid);const m=S.members.find(x=>x.id===mid);return{member_id:mid,member_name:m?m.name:'?',has_tasks_today:sec.today.filter(x=>!x.done).length>0,has_overdue:sec.overdue.length>0,tasks_today_count:sec.today.filter(x=>!x.done).length,overdue_count:sec.overdue.length,tasks_today:sec.today.filter(x=>!x.done).map(x=>x.task.name),overdue_tasks:sec.overdue.map(x=>x.task.name),timestamp:new Date().toISOString()};}
-function buildOverduePayload(){const sec=getTaskSections(null);return{has_overdue:sec.overdue.length>0,overdue_count:sec.overdue.length,overdue_tasks:sec.overdue.map(x=>({name:x.task.name,assignee:x.task.assignee?(S.members.find(m=>m.id===x.task.assignee)?.name||'?'):'Anyone',due:friendlyDate(x.due)})),timestamp:new Date().toISOString()};}
+function buildMemberPayload(mid){const sec=getTaskSections(mid);const m=S.members.find(x=>x.id===mid);const aw=isAway();return{member_id:mid,member_name:m?m.name:'?',away:aw,has_tasks_today:sec.today.filter(x=>!x.done).length>0,has_overdue:aw?false:sec.overdue.length>0,tasks_today_count:sec.today.filter(x=>!x.done).length,overdue_count:aw?0:sec.overdue.length,tasks_today:sec.today.filter(x=>!x.done).map(x=>x.task.name),overdue_tasks:aw?[]:sec.overdue.map(x=>x.task.name),timestamp:new Date().toISOString()};}
+function buildOverduePayload(){const sec=getTaskSections(null);if(isAway())return{has_overdue:false,overdue_count:0,overdue_tasks:[],away:true,timestamp:new Date().toISOString()};return{has_overdue:sec.overdue.length>0,away:false,overdue_count:sec.overdue.length,overdue_tasks:sec.overdue.map(x=>({name:x.task.name,assignee:x.task.assignee?(S.members.find(m=>m.id===x.task.assignee)?.name||'?'):'Anyone',due:friendlyDate(x.due)})),timestamp:new Date().toISOString()};}
 async function postWh(id,payload){const base=(CFG.ha.url||'').replace(/\/$/,'');if(!base)return null;const headers={'Content-Type':'application/json'};if(CFG.ha.token)headers['Authorization']='Bearer '+CFG.ha.token;const r=await fetch(base+'/api/webhook/'+id,{method:'POST',headers,body:JSON.stringify(payload)});return r.ok;}
 let lastWHfp=null;
 async function fireAllWebhooks(force=false){if(!CFG.ha.url)return;const sec=getTaskSections(null);const fp=JSON.stringify({o:sec.overdue.map(x=>x.key),t:sec.today.filter(x=>!x.done).map(x=>x.key)});if(!force&&fp===lastWHfp)return;lastWHfp=fp;const members=S.members.length?S.members:[];let allOk=true;for(const m of members){try{const ok=await postWh(whId(m.id),buildMemberPayload(m.id));if(!ok)allOk=false;}catch(e){allOk=false;}}try{const ok=await postWh(OVERDUE_WH,buildOverduePayload());if(!ok)allOk=false;}catch(e){allOk=false;}const dot=document.getElementById('haDot'),txt=document.getElementById('haTxt');if(members.length){dot.className='dot '+(allOk?'ok':'err');txt.textContent=allOk?'HA ok':'HA err';}const r=document.getElementById('haResult');if(r){r.textContent=allOk?(members.length+1)+' webhooks fired':'Some failed';r.className='dp-result '+(allOk?'ok':'err');}}
@@ -445,14 +504,165 @@ function renderHaTab(){document.getElementById('haUrl').value=CFG.ha.url||'';doc
 // RENDER DASHBOARD
 function getMember(id){return S.members.find(m=>m.id===id);}
 function recurDesc(task){if(task.recur==='once')return'One-off \u00b7 '+niceDate(task.dueDate);if(task.recur==='weekly')return'Every '+DOW[task.dowIndex];if(task.recur==='monthly')return'Monthly on '+ordinal(task.domIndex);if(task.recur==='yearly')return'Yearly \u00b7 '+niceDate(task.yearlyDate);if(task.recur==='custom')return'Every '+task.intervalDays+' days';if(task.recur==='xweekly')return'Every '+task.intervalWeeks+' week'+(task.intervalWeeks>1?'s':'')+' on '+DOW[task.dowIndex];return'';}
-function renderTaskCard(item,type){const{task,due,key}=item,done=!!S.completions[key];const member=task.assignee?getMember(task.assignee):null;const diff=diffDays(today(),due);let tc='tag-upcoming',tl=friendlyDate(due);if(type==='overdue'){tc='tag-overdue';tl=friendlyDateFull(due);}else if(diff===0){tc='tag-today';tl='Due Today';}else if(diff>0){tc='tag-upcoming';tl=friendlyDateFull(due);}return'<div class="task-card '+type+' '+(done?'done':'')+'" id="card-'+key.replace(/[^a-zA-Z0-9_-]/g,'')+'"><div class="check '+(done?'checked':'')+'" onclick="toggleDone(\''+key+'\')"></div><div class="task-info"><div class="task-name">'+(task.emoji?task.emoji+' ':'')+esc(task.name)+'</div><div class="task-meta"><span class="tag '+tc+'">'+tl+'</span><span class="task-recur">'+recurDesc(task)+'</span>'+(member?'<span class="assignee-tag" style="background:'+member.color+'22;color:'+member.color+'">'+esc(member.name)+'</span>':'')+(task.notes?'<span class="task-note-text">'+esc(task.notes)+'</span>':'')+'</div></div><div class="card-actions"><div class="icon-btn" onclick="editTask(\''+task.id+'\')">\u270f\ufe0f</div><div class="icon-btn" onclick="deleteTask(\''+task.id+'\')">\ud83d\uddd1\ufe0f</div></div></div>';}
+function renderTaskCard(item,type){const{task,due,key}=item,done=!!S.completions[key];const member=task.assignee?getMember(task.assignee):null;const diff=diffDays(today(),due);let tc='tag-upcoming',tl=friendlyDate(due);if(type==='overdue'){tc='tag-overdue';tl=overdueLabel(due,item.missed);}else if(diff===0){tc='tag-today';tl='Due Today';}else if(diff>0){tc='tag-upcoming';tl=friendlyDateFull(due);}const click=(type==='overdue')?('toggleOverdue(\''+task.id+'\',\''+key+'\')'):('toggleDone(\''+key+'\')');return'<div class="task-card '+type+' '+(done?'done':'')+'" id="card-'+key.replace(/[^a-zA-Z0-9_-]/g,'')+'"><div class="check '+(done?'checked':'')+'" onclick="'+click+'"></div><div class="task-info"><div class="task-name">'+(task.emoji?task.emoji+' ':'')+esc(task.name)+'</div><div class="task-meta"><span class="tag '+tc+'">'+tl+'</span><span class="task-recur">'+recurDesc(task)+'</span>'+(member?'<span class="assignee-tag" style="background:'+member.color+'22;color:'+member.color+'">'+esc(member.name)+'</span>':'')+(task.notes?'<span class="task-note-text">'+esc(task.notes)+'</span>':'')+'</div></div><div class="card-actions"><div class="icon-btn" onclick="editTask(\''+task.id+'\')">\u270f\ufe0f</div><div class="icon-btn" onclick="deleteTask(\''+task.id+'\')">\ud83d\uddd1\ufe0f</div></div></div>';}
 function renderDashboard(){const s=getTaskSections(UI.filter==='all'?null:UI.filter);let h='';if(!s.overdue.length&&!s.today.length&&!s.upcoming.length)h='<div class="empty-state"><div class="e-icon">\u2728</div><p>All clear \u2014 no tasks!</p></div>';if(s.overdue.length)h+='<div class="section-header"><span class="section-title">Overdue</span><span class="section-badge">'+s.overdue.length+'</span></div><div class="task-list">'+s.overdue.map(i=>renderTaskCard(i,'overdue')).join('')+'</div>';if(s.today.length)h+='<div class="section-header"><span class="section-title">Today</span><span class="section-badge">'+s.today.length+'</span></div><div class="task-list">'+s.today.map(i=>renderTaskCard(i,'today')).join('')+'</div>';if(s.upcoming.length)h+='<div class="section-header"><span class="section-title">Upcoming</span><span class="section-badge">'+s.upcoming.length+'</span></div><div class="task-list">'+s.upcoming.map(i=>renderTaskCard(i,'upcoming')).join('')+'</div>';document.getElementById('dashboardContent').innerHTML=h;}
-function renderAllTasks(){if(!S.tasks.length){document.getElementById('allTasksList').innerHTML='<div class="empty-state"><div class="e-icon">\ud83d\udccb</div><p>No tasks yet.</p></div>';return;}const t=today();document.getElementById('allTasksList').innerHTML=S.tasks.map(task=>{const due=nextDueDate(task,t),mem=task.assignee?getMember(task.assignee):null;return'<div class="all-row"><span style="font-size:17px">'+(task.emoji||'\ud83d\udccc')+'</span><span class="all-name">'+esc(task.name)+'</span><span class="all-detail">'+recurDesc(task)+'</span><span class="all-detail">'+(due?friendlyDate(due):'\u2014')+'</span>'+(mem?'<span class="assignee-tag" style="background:'+mem.color+'22;color:'+mem.color+';font-size:12px">'+esc(mem.name)+'</span>':'<span style="font-size:12px;color:#aaa">Anyone</span>')+'<div class="icon-btn" onclick="editTask(\''+task.id+'\')">\u270f\ufe0f</div><div class="icon-btn" onclick="deleteTask(\''+task.id+'\')">\ud83d\uddd1\ufe0f</div></div>';}).join('');}
+function renderAllTasks(){
+  const el=document.getElementById('allTasksList');
+  if(!S.tasks.length){el.innerHTML='<div class="empty-state"><div class="e-icon">📋</div><p>No tasks yet.</p></div>';return;}
+  const t=today();
+  const qEl=document.getElementById('allSearch');
+  const q=(qEl&&qEl.value||'').trim().toLowerCase();
+  let list=S.tasks.slice();
+  if(q){list=list.filter(function(task){
+    const mem=task.assignee?getMember(task.assignee):null;
+    const hay=[task.name||'',task.notes||'',mem?mem.name:'',recurDesc(task)].join(' ').toLowerCase();
+    return hay.indexOf(q)!==-1;
+  });}
+  list.sort(function(a,b){
+    const d=(b.earlyCount||0)-(a.earlyCount||0);
+    if(d!==0)return d;
+    return (a.name||'').localeCompare(b.name||'');
+  });
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="e-icon">🔍</div><p>No tasks match “'+esc(q)+'”</p></div>';return;}
+  el.innerHTML=list.map(function(task){
+    const due=nextDueDate(task,t),mem=task.assignee?getMember(task.assignee):null;
+    return'<div class="all-row"><span style="font-size:17px">'+(task.emoji||'📌')+'</span>'
+      +'<span class="all-name">'+esc(task.name)+'</span>'
+      +'<span class="all-detail">'+recurDesc(task)+'</span>'
+      +'<span class="all-detail">'+(due?friendlyDate(due):'—')+'</span>'
+      +(mem?'<span class="assignee-tag" style="background:'+mem.color+'22;color:'+mem.color+';font-size:12px">'+esc(mem.name)+'</span>':'<span style="font-size:12px;color:#aaa">Anyone</span>')
+      +'<div class="icon-btn" title="Mark done today" onclick="doneToday(\''+task.id+'\')" style="border-color:#2f7c5a66;color:var(--accent2);">✓</div>'
+      +'<div class="icon-btn" onclick="editTask(\''+task.id+'\')">✏️</div>'
+      +'<div class="icon-btn" onclick="deleteTask(\''+task.id+'\')">🗑️</div></div>';
+  }).join('');
+}
 function renderMembers(){document.getElementById('memberList').innerHTML=S.members.map(m=>'<div class="member-item"><div class="m-avatar" style="background:'+m.color+'">'+m.name[0].toUpperCase()+'</div><span class="m-name">'+esc(m.name)+'</span><div style="display:flex;gap:4px">'+COLORS.map(c=>'<div class="cswatch '+(m.color===c?'sel':'')+'" style="background:'+c+'" onclick="setMemberColor(\''+m.id+'\',\''+c+'\')"></div>').join('')+'</div><div class="icon-btn" onclick="removeMember(\''+m.id+'\')">\ud83d\uddd1\ufe0f</div></div>').join('');renderFilterChips();const sel=document.getElementById('fAssignee'),cur=sel.value;sel.innerHTML='<option value="">Anyone</option>'+S.members.map(m=>'<option value="'+m.id+'">'+esc(m.name)+'</option>').join('');sel.value=cur;}
 function renderFilterChips(){const chips=['<div class="chip '+(UI.filter==='all'?'active':'')+'" onclick="setFilter(\'all\')">Everyone</div>'];S.members.forEach(m=>{chips.push('<div class="chip '+(UI.filter===m.id?'active':'')+'" onclick="setFilter(\''+m.id+'\')">'+esc(m.name)+'</div>');});document.getElementById('filterChips').innerHTML=chips.join('');}
-function renderAll(){renderDashboard();renderAllTasks();renderMembers();renderHaControls();}
+// AWAY MODE
+function isAway(){return !!(S.away&&S.away.active);}
+function awayModeOf(task){const m=task.awayMode||'recent';if(m==='shift'&&task.recur!=='custom'&&task.recur!=='xweekly')return'recent';return m;}
+function renderAwayUI(){const b=document.getElementById('awayBanner'),btn=document.getElementById('awayBtn');if(!b||!btn)return;if(isAway()){const d=Math.max(0,diffDays(S.away.since,today()));b.classList.add('show');document.getElementById('abText').textContent='Away since '+niceDate(S.away.since);document.getElementById('abSub').textContent=(d===1?'1 day':d+' days')+' · home alerts paused';btn.classList.add('away-on');}else{b.classList.remove('show');btn.classList.remove('away-on');}}
+function openAwayPanel(){if(isAway()){returnHome();return;}document.getElementById('awayPanel').classList.add('open');}
+function closeAwayPanel(){document.getElementById('awayPanel').classList.remove('open');}
+function startAway(){S.away={active:true,since:today(),lastReturn:(S.away&&S.away.lastReturn)||null};awayUndoSnapshot=null;closeAwayPanel();scheduleSave();renderAwayUI();renderAll();fireAllWebhooks(true);}
+function returnHome(){
+  if(!isAway())return;
+  const t=today(),since=S.away.since,windowEnd=addDays(t,-1);
+  const days=Math.max(0,diffDays(since,t));
+  if(!S.skips)S.skips={};
+  awayUndoSnapshot={tasks:JSON.parse(JSON.stringify(S.tasks)),skips:JSON.parse(JSON.stringify(S.skips)),away:JSON.parse(JSON.stringify(S.away))};
+  let cleared=0;const shifted=[];
+  S.tasks.forEach(task=>{
+    const mode=awayModeOf(task);
+    if(mode==='unchanged')return;
+    if(mode==='shift'){
+      let shift=days;
+      if(task.recur==='xweekly')shift=Math.round(days/7)*7;
+      if(shift>0&&task.startDate){
+        task.startDate=addDays(task.startDate,shift);
+        if(since<=windowEnd){getDueDatesInRange(task,since,windowEnd).forEach(d=>{const k=task.id+'_'+d;if(!isCleared(k)){S.skips[k]='away';cleared++;}});}
+        shifted.push({name:task.name,emoji:task.emoji||'',due:nextDueDate(task,t)});
+      }
+      return;
+    }
+    // 'recent': nothing to do here — the overdue card collapses the run and one tick clears it
+  });
+  const sec=getTaskSections(null);
+  const missedTotal=sec.overdue.reduce(function(n,x){return n+(x.missed||1);},0);
+  const waiting=sec.overdue.map(x=>({name:x.task.name,emoji:x.task.emoji||'',kind:'Overdue'}))
+    .concat(sec.today.filter(x=>!x.done).map(x=>({name:x.task.name,emoji:x.task.emoji||'',kind:'Today'})));
+  S.away={active:false,since:null,lastReturn:{since:since,date:t,days:days}};
+  scheduleSave();renderAwayUI();renderAll();fireAllWebhooks(true);
+  showReturnSummary({days:days,waiting:waiting,cleared:cleared,missed:missedTotal,shifted:shifted});
+}
+function undoReturn(){if(!awayUndoSnapshot)return;S.tasks=awayUndoSnapshot.tasks;S.skips=awayUndoSnapshot.skips;S.away=awayUndoSnapshot.away;awayUndoSnapshot=null;closeReturnSummary();scheduleSave();renderAwayUI();renderAll();fireAllWebhooks(true);showBanner('Away mode restored');}
+function closeReturnSummary(){document.getElementById('returnSummary').classList.remove('open');}
+function showReturnSummary(d){
+  const cap=function(a,n){return{items:a.slice(0,n),more:Math.max(0,a.length-n)};};
+  const w=cap(d.waiting,5),sh=cap(d.shifted,5);
+  let h='<div class="panel-icon green">🏠</div><div class="modal-title">Welcome home</div>';
+  h+='<div class="panel-body" style="margin-bottom:18px;">You were away '+(d.days===1?'1 day':d.days+' days')+'. Here\'s where things stand.</div>';
+  h+='<div class="sum-stats"><div class="sum-stat"><div class="sum-num" style="color:var(--accent);">'+d.waiting.length+'</div><div class="sum-lbl">Waiting</div></div>';
+  h+='<div class="sum-stat"><div class="sum-num" style="color:var(--ink3);">'+(d.missed||0)+'</div><div class="sum-lbl">Missed</div></div>';
+  h+='<div class="sum-stat"><div class="sum-num" style="color:var(--accent3);">'+d.shifted.length+'</div><div class="sum-lbl">Shifted</div></div></div>';
+  if(w.items.length){h+='<div class="sum-sec">Waiting for you</div>';w.items.forEach(function(i){var od=i.kind==='Overdue';h+='<div class="sum-task"><span style="font-size:15px;">'+(i.emoji||'📌')+'</span><span class="sum-task-name">'+esc(i.name)+'</span><span class="sum-tag" style="background:'+(od?'#fde8e4':'#fef3e2')+';color:'+(od?'var(--accent)':'var(--warn)')+';">'+i.kind+'</span></div>';});if(w.more)h+='<div class="sum-more">+'+w.more+' more</div>';}
+  else{h+='<div class="sum-sec">Nothing waiting — you\'re all clear</div>';}
+  if(sh.items.length){h+='<div class="sum-sec" style="margin-top:18px;">Schedules shifted forward</div>';sh.items.forEach(function(i){h+='<div class="sum-shift"><span style="font-size:14px;">'+(i.emoji||'📅')+'</span><span style="color:var(--ink2);font-weight:500;">'+esc(i.name)+'</span><span>&rarr; '+(i.due?niceDate(i.due):'—')+'</span></div>';});if(sh.more)h+='<div class="sum-more">+'+sh.more+' more</div>';}
+  h+='<div class="modal-actions" style="margin-top:22px;align-items:center;"><button class="btn-link" onclick="undoReturn()">Undo — put everything back</button><div style="flex:1;"></div><button class="btn btn-green" onclick="closeReturnSummary()">Got it</button></div>';
+  document.getElementById('returnSummaryBody').innerHTML=h;
+  document.getElementById('returnSummary').classList.add('open');
+}
+const AWAY_OPTS=[['unchanged','Unchanged','Carries on as normal. Every missed date still counts.'],['recent','Collapse into one','One card showing how many were missed. Ticking it clears the whole backlog.'],['shift','Shift the schedule','The clock pauses while you\'re away. 5 weeks left when you leave means 5 weeks left when you return.']];
+function renderAwayModeField(task){
+  const r=document.getElementById('fRecur').value;const canShift=(r==='custom'||r==='xweekly');
+  let cur=UI.awayMode||(task&&task.awayMode)||'recent';
+  if(cur==='shift'&&!canShift)cur='recent';
+  UI.awayMode=cur;
+  let h='<div class="fg"><label class="fl">When we\'re away</label><div class="away-opts">';
+  AWAY_OPTS.forEach(function(o){var v=o[0],dis=(v==='shift'&&!canShift);h+='<div class="away-opt'+(cur===v?' sel':'')+(dis?' dis':'')+'"'+(dis?'':' onclick="setAwayMode(\''+v+'\')"')+'><div class="ao-radio"></div><div class="ao-text"><div class="ao-title">'+o[1]+'</div><div class="ao-desc">'+o[2]+'</div></div></div>';});
+  h+='</div><div class="fhint">'+(canShift?'Default is &quot;collapse into one&quot;.':'Shifting is only available for &quot;every X days&quot; and &quot;every X weeks&quot;.')+'</div></div>';
+  document.getElementById('awayModeField').innerHTML=h;
+}
+function setAwayMode(v){UI.awayMode=v;renderAwayModeField();}
+function renderAll(){renderDashboard();renderAllTasks();renderMembers();renderHaControls();renderAwayUI();}
 
 // INTERACTIONS
+function clearsBacklog(task){return (task.awayMode||'recent')!=='unchanged';}
+function clearBacklog(task,tag,beforeDate){
+  if(!S.skips)S.skips={};
+  const t=today();const fl=awayScanFloor(t);
+  const start=(task.recur==='once')?task.dueDate:(task.createdAt&&task.createdAt>fl?task.createdAt:fl);
+  if(!start)return 0;
+  let n=0;
+  getDueDatesInRange(task,start,addDays(t,-1)).forEach(function(d){
+    if(beforeDate&&d>beforeDate)return;
+    const k=task.id+'_'+d;
+    if(!isCleared(k)){S.skips[k]=tag;n++;}
+  });
+  return n;
+}
+function toggleOverdue(taskId,key){
+  const task=S.tasks.find(t=>t.id===taskId);
+  const wasDone=!!S.completions[key];
+  const safeId='card-'+key.replace(/[^a-zA-Z0-9_-]/g,'');
+  const card=document.getElementById(safeId);
+  if(card)card.classList.add(wasDone?'unchecking':'checking');
+  const tag='bulk:'+key;
+  if(wasDone){
+    delete S.completions[key];
+    if(S.skips)Object.keys(S.skips).forEach(function(k){if(S.skips[k]===tag)delete S.skips[k];});
+  }else{
+    S.completions[key]=true;
+    if(task&&clearsBacklog(task))clearBacklog(task,tag,null);
+  }
+  scheduleSave();
+  setTimeout(function(){renderDashboard();fireAllWebhooks(true);checkAutoPhotoFrame();},350);
+}
+async function doneToday(id){
+  const task=S.tasks.find(t=>t.id===id);if(!task)return;
+  const t=today();
+  let newStart=null,nextDue=null,msg='';
+  if(task.recur==='custom'||task.recur==='xweekly'){
+    const iv=(task.recur==='custom')?Math.max(1,task.intervalDays||1):Math.max(1,task.intervalWeeks||1)*7;
+    newStart=addDays(t,iv);
+    nextDue=nextDueDate(Object.assign({},task,{startDate:newStart}),t);
+    msg='Mark \u201c'+task.name+'\u201d as done today? Next due moves to '+(nextDue?niceDate(nextDue):'\u2014')+'.';
+  }else if(task.recur==='once'){
+    nextDue=task.dueDate;
+    msg='Mark \u201c'+task.name+'\u201d as done? This one-off task will be complete.';
+  }else{
+    nextDue=nextDueDate(task,t);
+    msg='Mark \u201c'+task.name+'\u201d as done today? The next occurrence on '+(nextDue?niceDate(nextDue):'\u2014')+' will be skipped.';
+  }
+  if(!await customConfirm(msg,'Mark done'))return;
+  if(newStart){task.startDate=newStart;}
+  else if(nextDue){S.completions[task.id+'_'+nextDue]=true;}
+  if(clearsBacklog(task))clearBacklog(task,'early:'+t,null);
+  task.earlyCount=(task.earlyCount||0)+1;
+  scheduleSave();renderAll();
+  setTimeout(function(){fireAllWebhooks(true);checkAutoPhotoFrame();},300);
+  showBanner('Marked done'+(newStart&&nextDue?' \u00b7 next due '+niceDate(nextDue):''));
+}
 function toggleDone(key){const wasDone=!!S.completions[key];const safeId='card-'+key.replace(/[^a-zA-Z0-9_-]/g,'');const card=document.getElementById(safeId);if(card)card.classList.add(wasDone?'unchecking':'checking');if(wasDone)delete S.completions[key];else S.completions[key]=true;scheduleSave();setTimeout(()=>{renderDashboard();fireAllWebhooks(true);checkAutoPhotoFrame();},350);}
 function setFilter(val){UI.filter=val;renderFilterChips();renderDashboard();}
 
@@ -467,12 +677,12 @@ function launchPaprika(){if(typeof fully!=='undefined'&&fully.startApplication){
 function goHome(){if(typeof fully!=='undefined'&&fully.exit){fully.exit();}else{showBanner('Home button only works in Fully Kiosk Browser');}}
 
 // MODAL
-function openAddModal(){UI.editingId=null;document.getElementById('modalTitle').textContent='Add Task';['fName','fEmoji','fNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('fRecur').value='weekly';document.getElementById('fAssignee').value='';document.getElementById('fLeadTime').value=S.settings.defaultLeadTime??0;updateRecurFields();document.getElementById('overlay').classList.add('open');setTimeout(()=>document.getElementById('fName').focus(),100);}
-function editTask(id){const task=S.tasks.find(t=>t.id===id);if(!task)return;UI.editingId=id;document.getElementById('modalTitle').textContent='Edit Task';document.getElementById('fName').value=task.name;document.getElementById('fRecur').value=task.recur;document.getElementById('fAssignee').value=task.assignee||'';document.getElementById('fLeadTime').value=task.leadTime??0;document.getElementById('fEmoji').value=task.emoji||'';document.getElementById('fNotes').value=task.notes||'';updateRecurFields(task);document.getElementById('overlay').classList.add('open');}
+function openAddModal(){UI.editingId=null;document.getElementById('modalTitle').textContent='Add Task';['fName','fEmoji','fNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('fRecur').value='weekly';document.getElementById('fAssignee').value='';document.getElementById('fLeadTime').value=S.settings.defaultLeadTime??0;UI.awayMode='recent';updateRecurFields();document.getElementById('overlay').classList.add('open');setTimeout(()=>document.getElementById('fName').focus(),100);}
+function editTask(id){const task=S.tasks.find(t=>t.id===id);if(!task)return;UI.editingId=id;document.getElementById('modalTitle').textContent='Edit Task';document.getElementById('fName').value=task.name;document.getElementById('fRecur').value=task.recur;document.getElementById('fAssignee').value=task.assignee||'';document.getElementById('fLeadTime').value=task.leadTime??0;document.getElementById('fEmoji').value=task.emoji||'';document.getElementById('fNotes').value=task.notes||'';UI.awayMode=task.awayMode||'recent';updateRecurFields(task);document.getElementById('overlay').classList.add('open');}
 function closeOverlay(){document.getElementById('overlay').classList.remove('open');}
 function closeOverlayBg(e){if(e.target===document.getElementById('overlay'))closeOverlay();}
-function updateRecurFields(task){const r=document.getElementById('fRecur').value,t=today();let h='';if(r==='once')h='<div class="fg"><label class="fl">Due Date *</label><input type="date" class="fi" id="rDate" value="'+(task?.dueDate||t)+'"></div>';else if(r==='weekly'){const s=task?.dowIndex??new Date().getDay();h='<div class="fg"><label class="fl">Day of Week *</label><select class="fs" id="rDow">'+DOW.map((d,i)=>'<option value="'+i+'"'+(i===s?' selected':'')+'>'+d+'</option>').join('')+'</select></div>';}else if(r==='monthly'){const s=task?.domIndex??1;h='<div class="fg"><label class="fl">Day of Month *</label><select class="fs" id="rDom">'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'"'+((i+1)===s?' selected':'')+'>'+(i+1)+(i+1>28?' *':'')+'</option>').join('')+'</select><div class="fhint">* Days 29-31: runs on last day if month is shorter.</div></div>';}else if(r==='yearly')h='<div class="fg"><label class="fl">Date each year *</label><input type="date" class="fi" id="rYearlyDate" value="'+(task?.yearlyDate||t)+'"></div>';else if(r==='custom'){const iv=task?.intervalDays??7,sd=task?.startDate||t;h='<div class="frow"><div class="fg"><label class="fl">Every (days) *</label><input type="number" class="fi" id="rInterval" min="1" max="365" value="'+iv+'"></div><div class="fg"><label class="fl">Starting from *</label><input type="date" class="fi" id="rStartDate" value="'+sd+'"></div></div>';}else if(r==='xweekly'){const wk=task?.intervalWeeks??2,dow=task?.dowIndex??new Date().getDay(),sd=task?.startDate||t;h='<div class="frow"><div class="fg"><label class="fl">Every (weeks) *</label><input type="number" class="fi" id="rWeekInterval" min="1" max="52" value="'+wk+'"></div><div class="fg"><label class="fl">Day of Week *</label><select class="fs" id="rXDow">'+DOW.map((d,i)=>'<option value="'+i+'"'+(i===dow?' selected':'')+'>'+d+'</option>').join('')+'</select></div></div><div class="fg"><label class="fl">Starting from week of *</label><input type="date" class="fi" id="rXStartDate" value="'+sd+'"><div class="fhint">First occurrence is the chosen day on or after this date.</div></div>';}document.getElementById('recurFields').innerHTML=h;}
-function saveTask(){const name=document.getElementById('fName').value.trim();if(!name){alert('Enter a task name.');return;}const recur=document.getElementById('fRecur').value;const existingTask=UI.editingId?S.tasks.find(t=>t.id===UI.editingId):null;const task={id:UI.editingId||('t'+Date.now()),name,recur,assignee:document.getElementById('fAssignee').value||'',leadTime:parseInt(document.getElementById('fLeadTime').value)||0,emoji:document.getElementById('fEmoji').value.trim(),notes:document.getElementById('fNotes').value.trim(),createdAt:existingTask?.createdAt||today()};if(recur==='once')task.dueDate=document.getElementById('rDate')?.value||today();if(recur==='weekly')task.dowIndex=parseInt(document.getElementById('rDow')?.value??0);if(recur==='monthly')task.domIndex=parseInt(document.getElementById('rDom')?.value??1);if(recur==='yearly')task.yearlyDate=document.getElementById('rYearlyDate')?.value||today();if(recur==='custom'){task.intervalDays=Math.max(1,parseInt(document.getElementById('rInterval')?.value)||7);task.startDate=document.getElementById('rStartDate')?.value||today();}if(recur==='xweekly'){task.intervalWeeks=Math.max(1,parseInt(document.getElementById('rWeekInterval')?.value)||2);task.dowIndex=parseInt(document.getElementById('rXDow')?.value??0);task.startDate=document.getElementById('rXStartDate')?.value||today();}if(UI.editingId){const idx=S.tasks.findIndex(t=>t.id===UI.editingId);if(idx>=0)S.tasks[idx]=task;}else S.tasks.push(task);scheduleSave();closeOverlay();renderAll();setTimeout(()=>fireAllWebhooks(true),300);}
+function updateRecurFields(task){const r=document.getElementById('fRecur').value,t=today();let h='';if(r==='once')h='<div class="fg"><label class="fl">Due Date *</label><input type="date" class="fi" id="rDate" value="'+(task?.dueDate||t)+'"></div>';else if(r==='weekly'){const s=task?.dowIndex??new Date().getDay();h='<div class="fg"><label class="fl">Day of Week *</label><select class="fs" id="rDow">'+DOW.map((d,i)=>'<option value="'+i+'"'+(i===s?' selected':'')+'>'+d+'</option>').join('')+'</select></div>';}else if(r==='monthly'){const s=task?.domIndex??1;h='<div class="fg"><label class="fl">Day of Month *</label><select class="fs" id="rDom">'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'"'+((i+1)===s?' selected':'')+'>'+(i+1)+(i+1>28?' *':'')+'</option>').join('')+'</select><div class="fhint">* Days 29-31: runs on last day if month is shorter.</div></div>';}else if(r==='yearly')h='<div class="fg"><label class="fl">Date each year *</label><input type="date" class="fi" id="rYearlyDate" value="'+(task?.yearlyDate||t)+'"></div>';else if(r==='custom'){const iv=task?.intervalDays??7,sd=task?.startDate||t;h='<div class="frow"><div class="fg"><label class="fl">Every (days) *</label><input type="number" class="fi" id="rInterval" min="1" max="365" value="'+iv+'"></div><div class="fg"><label class="fl">Starting from *</label><input type="date" class="fi" id="rStartDate" value="'+sd+'"></div></div>';}else if(r==='xweekly'){const wk=task?.intervalWeeks??2,dow=task?.dowIndex??new Date().getDay(),sd=task?.startDate||t;h='<div class="frow"><div class="fg"><label class="fl">Every (weeks) *</label><input type="number" class="fi" id="rWeekInterval" min="1" max="52" value="'+wk+'"></div><div class="fg"><label class="fl">Day of Week *</label><select class="fs" id="rXDow">'+DOW.map((d,i)=>'<option value="'+i+'"'+(i===dow?' selected':'')+'>'+d+'</option>').join('')+'</select></div></div><div class="fg"><label class="fl">Starting from week of *</label><input type="date" class="fi" id="rXStartDate" value="'+sd+'"><div class="fhint">First occurrence is the chosen day on or after this date.</div></div>';}document.getElementById('recurFields').innerHTML=h;renderAwayModeField(task);}
+function saveTask(){const name=document.getElementById('fName').value.trim();if(!name){alert('Enter a task name.');return;}const recur=document.getElementById('fRecur').value;const existingTask=UI.editingId?S.tasks.find(t=>t.id===UI.editingId):null;const task={id:UI.editingId||('t'+Date.now()),name,recur,assignee:document.getElementById('fAssignee').value||'',leadTime:parseInt(document.getElementById('fLeadTime').value)||0,emoji:document.getElementById('fEmoji').value.trim(),notes:document.getElementById('fNotes').value.trim(),awayMode:UI.awayMode||'recent',createdAt:existingTask?.createdAt||today()};if(recur==='once')task.dueDate=document.getElementById('rDate')?.value||today();if(recur==='weekly')task.dowIndex=parseInt(document.getElementById('rDow')?.value??0);if(recur==='monthly')task.domIndex=parseInt(document.getElementById('rDom')?.value??1);if(recur==='yearly')task.yearlyDate=document.getElementById('rYearlyDate')?.value||today();if(recur==='custom'){task.intervalDays=Math.max(1,parseInt(document.getElementById('rInterval')?.value)||7);task.startDate=document.getElementById('rStartDate')?.value||today();}if(recur==='xweekly'){task.intervalWeeks=Math.max(1,parseInt(document.getElementById('rWeekInterval')?.value)||2);task.dowIndex=parseInt(document.getElementById('rXDow')?.value??0);task.startDate=document.getElementById('rXStartDate')?.value||today();}if(task.awayMode==='shift'&&task.recur!=='custom'&&task.recur!=='xweekly')task.awayMode='recent';if(UI.editingId){const idx=S.tasks.findIndex(t=>t.id===UI.editingId);if(idx>=0)S.tasks[idx]=task;}else S.tasks.push(task);scheduleSave();closeOverlay();renderAll();setTimeout(()=>fireAllWebhooks(true),300);}
 async function deleteTask(id){if(!await customConfirm('Delete this task?'))return;S.tasks=S.tasks.filter(t=>t.id!==id);for(const key of Object.keys(S.completions)){if(key.startsWith(id+'_'))delete S.completions[key];}scheduleSave();renderAll();setTimeout(()=>fireAllWebhooks(true),300);}
 function addMember(){const name=document.getElementById('newMemberName').value.trim();if(!name)return;S.members.push({id:'m'+Date.now(),name,color:COLORS[S.members.length%COLORS.length]});document.getElementById('newMemberName').value='';scheduleSave();renderAll();}
 async function removeMember(id){if(!await customConfirm('Remove this member?','Remove'))return;S.members=S.members.filter(m=>m.id!==id);S.tasks.forEach(t=>{if(t.assignee===id)t.assignee='';});if(UI.filter===id)UI.filter='all';scheduleSave();renderAll();}
@@ -485,7 +695,7 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){syncNow();if(gcalRefreshToken&&(!gcalAccessToken||gcalTokenExpiry<Date.now())){refreshAccessToken().then(ok=>{if(ok)fetchCal();});}else{fetchCal();}pollHaControlStates();}});
 
 // INIT
-loadCfg();loadPhotoSettings();updatePhotoFrameBtn();loadRefreshToken();
+loadCfg();loadPhotoSettings();updatePhotoFrameBtn();loadRefreshToken();if(!S.skips)S.skips={};if(!S.away)S.away={active:false,since:null,lastReturn:null};renderAwayUI();
 document.getElementById('headerDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
 updateHaStatus();setDbStatus('spin','Connecting...');
 const wasOAuthRedirect=handleOAuthRedirect();
