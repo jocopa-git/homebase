@@ -39,7 +39,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 main{max-width:1100px;margin:0 auto;padding:14px 16px 40px;}
 .view{display:none;}.view.active{display:block;}
 .dash-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;}
-.dash-right{border-left:1.5px solid var(--line);padding-left:20px;}
+.dash-right{border-left:1.5px solid var(--line);padding-left:20px;display:flex;flex-direction:column;}
+#calSection{flex:1;min-height:360px;flex-direction:column;}
+#calEventList{flex:1;min-height:0;display:flex;flex-direction:column;}
+.cal-day-block{display:flex;flex-direction:column;min-height:0;flex:1 1 50%;}
+.cal-day-block+.cal-day-block{border-top:1.5px solid var(--line);margin-top:16px;padding-top:14px;}
+.cal-day-events{min-height:0;overflow-y:auto;}
+@media(max-width:800px){#calSection{min-height:0;}.cal-day-block{flex:0 0 auto;}.cal-day-events{overflow:visible;}}
 @media(max-width:800px){.dash-grid{grid-template-columns:1fr;}.dash-right{border-left:none;padding-left:0;border-top:1.5px solid var(--line);padding-top:16px;margin-top:8px;}}
 .filter-bar{display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
 .chip{padding:4px 12px;border-radius:20px;border:1.5px solid var(--line);font-size:12px;font-weight:500;cursor:pointer;background:white;color:var(--ink2);transition:all 0.15s;user-select:none;}
@@ -511,16 +517,16 @@ function renderCalendarSection(){
   const sec=document.getElementById('calSection'),list=document.getElementById('calEventList'),badge=document.getElementById('calBadge');
   const enabledCals=(CFG.cal.calendars||[]).filter(c=>c.enabled!==false);
   if(!gcalAccessToken||!enabledCals.length){sec.style.display='none';return;}
-  sec.style.display='block';
+  sec.style.display='flex';
   const nT=calEventsToday.length,nM=calEventsTomorrow.length,tot=nT+nM;
   badge.textContent=(tot===1?'1 event':tot+' events');
-  let h='<div class="cal-day-label">Today</div>';
-  h+=nT?('<div class="cal-event-list">'+calEventsToday.map(calEventHtml).join('')+'</div>')
-       :'<div class="cal-empty">Nothing today</div>';
-  h+='<div class="cal-day-label">Tomorrow</div>';
-  h+=nM?('<div class="cal-event-list">'+calEventsTomorrow.map(calEventHtml).join('')+'</div>')
-       :'<div class="cal-empty">Nothing tomorrow</div>';
-  list.innerHTML=h;
+  const block=function(label,evs,emptyTxt){
+    return'<div class="cal-day-block"><div class="cal-day-label">'+label+'</div><div class="cal-day-events">'
+      +(evs.length?('<div class="cal-event-list">'+evs.map(calEventHtml).join('')+'</div>')
+                  :('<div class="cal-empty">'+emptyTxt+'</div>'))
+      +'</div></div>';
+  };
+  list.innerHTML=block('Today',calEventsToday,'Nothing today')+block('Tomorrow',calEventsTomorrow,'Nothing tomorrow');
 }
 function saveCalSettings(){CFG.cal.clientId=(document.getElementById('gcalClientId').value||'').trim();CFG.cal.refresh=parseInt(document.getElementById('gcalRefresh').value)||15;saveCfg();scheduleCalRefresh();}
 function toggleCalEnabled(i){CFG.cal.calendars[i].enabled=!CFG.cal.calendars[i].enabled;saveCfg();scheduleSave();renderCalCfgList();fetchCal();}
