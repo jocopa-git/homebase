@@ -475,9 +475,24 @@ function openGoogleCalendar(){
   if(typeof fully!=='undefined'&&fully.startApplication){fully.startApplication('com.google.android.calendar');return;}
   window.open('https://calendar.google.com/','_blank');
 }
+function toCalendarIntent(url){
+  try{
+    const u=new URL(url);
+    if(!/^https?:$/.test(u.protocol))return null;
+    return 'intent://'+u.host+u.pathname+(u.search||'')+'#Intent;scheme='+u.protocol.replace(':','')+';package=com.google.android.calendar;end';
+  }catch(e){return null;}
+}
 function openCalEvent(link){
   if(!link)return;
-  if(typeof fully!=='undefined'&&fully.startIntent){try{fully.startIntent(link);return;}catch(e){}}
+  if(typeof fully!=='undefined'&&fully.startIntent){
+    const iu=toCalendarIntent(link);
+    if(iu){
+      let usable=true;
+      try{if(fully.canResolveIntent)usable=!!fully.canResolveIntent(iu);}catch(e){usable=true;}
+      if(usable){try{fully.startIntent(iu);return;}catch(e){}}
+    }
+    try{fully.startIntent(link);return;}catch(e){}
+  }
   window.open(link,'_blank');
 }
 function calEventHtml(ev){
