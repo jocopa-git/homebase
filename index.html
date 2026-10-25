@@ -68,9 +68,12 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px;}
 .card-actions{display:flex;gap:4px;opacity:1;}
 .icon-btn{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--line);background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all 0.15s;}
 .icon-btn:hover{background:#f5f0e8;border-color:#aaa;}
-.cal-toggle{display:inline-flex;gap:0;border-radius:7px;overflow:hidden;border:1.5px solid var(--line);margin-left:auto;}
-.cal-toggle-btn{padding:3px 10px;font-size:10px;font-weight:600;cursor:pointer;background:white;color:var(--ink3);border:none;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.3px;}
-.cal-toggle-btn.active{background:var(--ink);color:white;}
+.cal-day-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--ink3);margin:14px 0 6px;padding-left:2px;}
+.cal-day-label:first-child{margin-top:0;}
+.cal-head-link{cursor:pointer;display:inline-flex;align-items:baseline;gap:9px;border-radius:7px;padding:2px 6px;margin-left:-6px;transition:background 0.15s;}
+.cal-head-link:hover{background:var(--line);}
+.cal-event[data-link]{cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;}
+.cal-event[data-link]:hover{border-color:#ccc;box-shadow:var(--shadow);}
 .cal-event-list{display:flex;flex-direction:column;gap:6px;}
 .cal-event{background:var(--card);border-radius:var(--radius);border:1.5px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:11px;position:relative;overflow:hidden;}
 .cal-time{font-size:12px;font-weight:600;color:var(--ink2);min-width:52px;flex-shrink:0;}
@@ -239,7 +242,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 40px;}
       </div>
       <div class="dash-right">
         <div id="calSection" style="display:none">
-          <div class="section-header"><span class="section-title">&#128197; Calendar</span><span class="section-badge" id="calBadge">0 events</span><div class="cal-toggle"><button class="cal-toggle-btn active" onclick="setCalView('today')">Today</button><button class="cal-toggle-btn" onclick="setCalView('tomorrow')">Tomorrow</button></div></div>
+          <div class="section-header"><span class="cal-head-link" onclick="openGoogleCalendar()" title="Open Google Calendar"><span class="section-title">&#128197; Calendar</span><span class="section-badge" id="calBadge">0 events</span></span></div>
           <div id="calEventList"></div>
         </div>
         <div class="ha-controls" id="haControlsSection" style="display:none;">
@@ -464,11 +467,46 @@ function loadRefreshToken(){try{gcalRefreshToken=localStorage.getItem('hb_gcal_r
 function setCalAuthStatus(state,text){const el=document.getElementById('calAuthStatus');if(el){el.textContent=text;el.className='dp-result '+(state==='ok'?'ok':state==='err'?'err':'');}}
 function updateCalAuthUI(){const si=document.getElementById('gcalSignInBtn'),so=document.getElementById('gcalSignOutBtn'),st=document.getElementById('calAuthStatus');if(gcalAccessToken&&gcalTokenExpiry>Date.now()){if(si)si.style.display='none';if(so)so.style.display='';if(st){st.textContent='Signed in';st.className='dp-result ok';}}else{if(si)si.style.display='';if(so)so.style.display='none';if(st){st.textContent=gcalAccessToken?'Token expired':'';st.className='dp-result'+(gcalAccessToken?' err':'');}}}
 async function fetchCalendarList(){if(!gcalAccessToken){setCalAuthStatus('err','Sign in first');return;}try{const r=await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList',{headers:{'Authorization':'Bearer '+gcalAccessToken}});if(!r.ok){if(r.status===401){gcalAccessToken=null;updateCalAuthUI();}throw new Error('HTTP '+r.status);}const data=await r.json();const existing=new Map((CFG.cal.calendars||[]).map(c=>[c.id,c]));const defaultColors=['#c84b2f','#2f7c5a','#3a5f9a','#d4873a','#7c3f9a','#3a8a8a','#9a3a5f','#6b4fa0'];let ci=0;CFG.cal.calendars=(data.items||[]).map(cal=>{const prev=existing.get(cal.id);return{id:cal.id,name:prev?.name||cal.summary||cal.id,color:prev?.color||cal.backgroundColor||defaultColors[ci++%defaultColors.length],enabled:prev?prev.enabled:(cal.selected!==false)};});saveCfg();scheduleSave();renderCalCfgList();}catch(e){setCalAuthStatus('err','Failed: '+e.message);}}
-async function fetchCalDay(cals,dateObj){if(!gcalAccessToken)return{events:[],errs:['Not signed in']};const tMin=new Date(dateObj.getFullYear(),dateObj.getMonth(),dateObj.getDate(),0,0,0).toISOString(),tMax=new Date(dateObj.getFullYear(),dateObj.getMonth(),dateObj.getDate(),23,59,59).toISOString();let all=[],errs=[];const headers={'Authorization':'Bearer '+gcalAccessToken};await Promise.all(cals.filter(c=>c.enabled!==false).map(async cal=>{const url='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(cal.id)+'/events?timeMin='+tMin+'&timeMax='+tMax+'&singleEvents=true&orderBy=startTime&maxResults=50';try{const r=await fetch(url,{headers});if(!r.ok){if(r.status===401){gcalAccessToken=null;updateCalAuthUI();}const e=await r.json().catch(()=>({}));errs.push(cal.name+': '+(e.error?.message||r.status));return;}const data=await r.json();(data.items||[]).forEach(ev=>all.push({id:ev.id,title:ev.summary||'(No title)',start:ev.start?.dateTime||ev.start?.date||'',allDay:!ev.start?.dateTime,location:ev.location||'',calName:cal.name,calColor:cal.color||'#6b4fa0'}));}catch(e){errs.push(cal.name+': '+e.message);}}));all.sort((a,b)=>{if(a.allDay&&!b.allDay)return-1;if(!a.allDay&&b.allDay)return 1;return a.start.localeCompare(b.start);});return{events:all,errs};}
+async function fetchCalDay(cals,dateObj){if(!gcalAccessToken)return{events:[],errs:['Not signed in']};const tMin=new Date(dateObj.getFullYear(),dateObj.getMonth(),dateObj.getDate(),0,0,0).toISOString(),tMax=new Date(dateObj.getFullYear(),dateObj.getMonth(),dateObj.getDate(),23,59,59).toISOString();let all=[],errs=[];const headers={'Authorization':'Bearer '+gcalAccessToken};await Promise.all(cals.filter(c=>c.enabled!==false).map(async cal=>{const url='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(cal.id)+'/events?timeMin='+tMin+'&timeMax='+tMax+'&singleEvents=true&orderBy=startTime&maxResults=50';try{const r=await fetch(url,{headers});if(!r.ok){if(r.status===401){gcalAccessToken=null;updateCalAuthUI();}const e=await r.json().catch(()=>({}));errs.push(cal.name+': '+(e.error?.message||r.status));return;}const data=await r.json();(data.items||[]).forEach(ev=>all.push({id:ev.id,title:ev.summary||'(No title)',start:ev.start?.dateTime||ev.start?.date||'',allDay:!ev.start?.dateTime,location:ev.location||'',link:ev.htmlLink||'',calName:cal.name,calColor:cal.color||'#6b4fa0'}));}catch(e){errs.push(cal.name+': '+e.message);}}));all.sort((a,b)=>{if(a.allDay&&!b.allDay)return-1;if(!a.allDay&&b.allDay)return 1;return a.start.localeCompare(b.start);});return{events:all,errs};}
 async function fetchCal(showFeedback=false){const cals=(CFG.cal.calendars||[]).filter(c=>c.enabled!==false);if(!gcalAccessToken||!cals.length){renderCalendarSection();return;}const dot=document.getElementById('calDot'),txt=document.getElementById('calTxt');dot.className='dot spin';txt.textContent='Fetching...';const now=new Date(),tomorrow=new Date(now);tomorrow.setDate(tomorrow.getDate()+1);const[todayR,tomorrowR]=await Promise.all([fetchCalDay(cals,now),fetchCalDay(cals,tomorrow)]);calEventsToday=todayR.events;calEventsTomorrow=tomorrowR.events;const allErrs=[...todayR.errs,...tomorrowR.errs],total=calEventsToday.length+calEventsTomorrow.length;const ok=allErrs.length===0;dot.className='dot '+(ok?'ok':'err');txt.textContent=ok?'Cal ('+total+')':'Cal err';const r=document.getElementById('calResult');if(showFeedback&&r){r.textContent=ok?total+' event(s)':allErrs.join(' | ');r.className='dp-result '+(ok?'ok':'err');}renderCalendarSection();}
 function scheduleCalRefresh(){if(calTimer)clearInterval(calTimer);calTimer=setInterval(()=>fetchCal(),Math.max(5,parseInt(CFG.cal.refresh)||15)*60000);}
-function setCalView(view){UI.calView=view;document.querySelectorAll('.cal-toggle-btn').forEach(btn=>{btn.classList.toggle('active',btn.textContent.toLowerCase()===view);});renderCalendarSection();}
-function renderCalendarSection(){const sec=document.getElementById('calSection'),list=document.getElementById('calEventList'),badge=document.getElementById('calBadge');const enabledCals=(CFG.cal.calendars||[]).filter(c=>c.enabled!==false);if(!gcalAccessToken||!enabledCals.length){sec.style.display='none';return;}sec.style.display='block';const events=UI.calView==='today'?calEventsToday:calEventsTomorrow,label=UI.calView==='today'?'today':'tomorrow';badge.textContent=events.length===1?'1 event '+label:events.length+' events '+label;if(!events.length){list.innerHTML='<div class="cal-empty">Nothing '+label+'</div>';return;}list.innerHTML='<div class="cal-event-list">'+events.map(ev=>{let time='All day';if(!ev.allDay)try{time=new Date(ev.start).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){}return'<div class="cal-event"><div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:'+ev.calColor+';border-radius:2px 0 0 2px"></div><div class="cal-time">'+time+'</div><div class="cal-info"><div class="cal-title">'+esc(ev.title)+'</div><div class="cal-meta"><span class="cal-tag" style="background:'+ev.calColor+'22;color:'+ev.calColor+'">'+esc(ev.calName)+'</span>'+(ev.location?'<span class="cal-loc">'+esc(ev.location.split(',')[0])+'</span>':'')+'</div></div></div>';}).join('')+'</div>';}
+function setCalView(view){UI.calView=view;renderCalendarSection();}
+function openGoogleCalendar(){
+  if(typeof fully!=='undefined'&&fully.startApplication){fully.startApplication('com.google.android.calendar');return;}
+  window.open('https://calendar.google.com/','_blank');
+}
+function openCalEvent(link){
+  if(!link)return;
+  if(typeof fully!=='undefined'&&fully.startIntent){try{fully.startIntent(link);return;}catch(e){}}
+  window.open(link,'_blank');
+}
+function calEventHtml(ev){
+  let time='All day';
+  if(!ev.allDay)try{time=new Date(ev.start).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){}
+  const link=ev.link||'';
+  return'<div class="cal-event"'+(link?' data-link="1" onclick="openCalEvent(\''+esc(link).replace(/'/g,"&#39;")+'\')"':'')+'>'
+    +'<div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:'+ev.calColor+';border-radius:2px 0 0 2px"></div>'
+    +'<div class="cal-time">'+time+'</div>'
+    +'<div class="cal-info"><div class="cal-title">'+esc(ev.title)+'</div><div class="cal-meta">'
+    +'<span class="cal-tag" style="background:'+ev.calColor+'22;color:'+ev.calColor+'">'+esc(ev.calName)+'</span>'
+    +(ev.location?'<span class="cal-loc">'+esc(ev.location.split(',')[0])+'</span>':'')
+    +'</div></div></div>';
+}
+function renderCalendarSection(){
+  const sec=document.getElementById('calSection'),list=document.getElementById('calEventList'),badge=document.getElementById('calBadge');
+  const enabledCals=(CFG.cal.calendars||[]).filter(c=>c.enabled!==false);
+  if(!gcalAccessToken||!enabledCals.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  const nT=calEventsToday.length,nM=calEventsTomorrow.length,tot=nT+nM;
+  badge.textContent=(tot===1?'1 event':tot+' events');
+  let h='<div class="cal-day-label">Today</div>';
+  h+=nT?('<div class="cal-event-list">'+calEventsToday.map(calEventHtml).join('')+'</div>')
+       :'<div class="cal-empty">Nothing today</div>';
+  h+='<div class="cal-day-label">Tomorrow</div>';
+  h+=nM?('<div class="cal-event-list">'+calEventsTomorrow.map(calEventHtml).join('')+'</div>')
+       :'<div class="cal-empty">Nothing tomorrow</div>';
+  list.innerHTML=h;
+}
 function saveCalSettings(){CFG.cal.clientId=(document.getElementById('gcalClientId').value||'').trim();CFG.cal.refresh=parseInt(document.getElementById('gcalRefresh').value)||15;saveCfg();scheduleCalRefresh();}
 function toggleCalEnabled(i){CFG.cal.calendars[i].enabled=!CFG.cal.calendars[i].enabled;saveCfg();scheduleSave();renderCalCfgList();fetchCal();}
 function updateCalColor(i,c){CFG.cal.calendars[i].color=c;saveCfg();scheduleSave();renderCalCfgList();renderCalendarSection();}
