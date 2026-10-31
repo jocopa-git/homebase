@@ -371,7 +371,10 @@ function saveCfg(){try{localStorage.setItem('hb_cfg_v3',JSON.stringify(CFG));}ca
 function loadCfg(){try{const c=localStorage.getItem('hb_cfg_v3')||localStorage.getItem('hb_cfg_v2')||localStorage.getItem('hb_cfg_v1');if(c)CFG={...CFG,...JSON.parse(c)};if(!CFG.sb)CFG.sb={url:'',key:''};if(!CFG.ha)CFG.ha={url:'',token:''};if(!CFG.cal)CFG.cal={clientId:'',refresh:15,calendars:[]};if(CFG.cal.apiKey&&!CFG.cal.clientId)delete CFG.cal.apiKey;if(!CFG.cal.calendars)CFG.cal.calendars=[];}catch(e){}}
 
 // SUPABASE SYNC
-let syncTimer=null,pendingSync=false,lastSyncTime=0;
+let syncTimer=null,pendingSync=false,lastSyncTime=0,pushInFlight=false;
+let localRemovals=new Set();
+function markAdded(k){localRemovals.delete(k);}
+function markRemoved(k){localRemovals.add(k);}
 function sbHeaders(){return{'Content-Type':'application/json','apikey':CFG.sb.key,'Authorization':'Bearer '+CFG.sb.key,'Prefer':'return=minimal'};}
 function sbUrl(path){return CFG.sb.url.replace(/\/$/,'')+'/rest/v1/'+path;}
 async function sbSetBatch(pairs){const rows=pairs.map(([key,value])=>({key,value,updated_at:new Date().toISOString()}));const r=await fetch(sbUrl('homebase'),{method:'POST',headers:{...sbHeaders(),'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});if(!r.ok)throw new Error('BATCH SET failed: '+r.status);}
@@ -379,8 +382,34 @@ async function pullFromSupabase(){if(!CFG.sb.url||!CFG.sb.key)return false;const
 async function pushToSupabase(){if(!CFG.sb.url||!CFG.sb.key)return false;await sbSetBatch([['tasks',S.tasks],['members',S.members],['settings',S.settings],['completions',S.completions],['haControls',S.haControls||[]],['skips',S.skips||{}],['away',S.away||{active:false,since:null,lastReturn:null}],['calendarDisplay',CFG.cal.calendars||[]]]);return true;}
 function showBanner(msg,isErr=false){const b=document.getElementById('syncBanner');b.textContent=msg;b.className='sync-banner show'+(isErr?' err':'');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),isErr?6000:2500);}
 function setDbStatus(state,text){document.getElementById('dbDot').className='dot '+state;document.getElementById('dbTxt').textContent=text;}
-async function syncNow(){if(!CFG.sb.url||!CFG.sb.key){setDbStatus('warn','No DB');return;}try{setDbStatus('spin','Syncing...');await pullFromSupabase();pruneCompletions();setDbStatus('ok','Synced');lastSyncTime=Date.now();renderAll();renderCalendarSection();renderHaControls();fireAllWebhooks();}catch(e){setDbStatus('err','Sync err');showBanner('Sync failed: '+e.message,true);}}
-function scheduleSave(){pendingSync=true;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{if(!pendingSync)return;pendingSync=false;if(!CFG.sb.url||!CFG.sb.key)return;try{await pushToSupabase();setDbStatus('ok','Saved');lastSyncTime=Date.now();}catch(e){setDbStatus('err','Save err');showBanner('Save failed: '+e.message,true);}},800);}
+async function sbReadMaps(keys){
+  const r=await fetch(sbUrl('homebase?select=key,value&key=in.('+keys.join(',')+')'),{headers:sbHeaders()});
+  if(!r.ok)throw new Error('read '+r.status);
+  const rows=await r.json();const m={};rows.forEach(x=>m[x.key]=x.value);return m;
+}
+async function flushPendingSave(){
+  if(!pendingSync)return false;
+  clearTimeout(syncTimer);pendingSync=false;
+  if(!CFG.sb.url||!CFG.sb.key)return false;
+  pushInFlight=true;
+  let adopted=0;
+  try{
+    // adopt ticks another device made while ours were queued, so the blob write doesn't clobber them
+    try{
+      const rm=await sbReadMaps(['completions','skips']);
+      if(rm.completions)for(const k in rm.completions){if(!(k in S.completions)&&!localRemovals.has(k)){S.completions[k]=rm.completions[k];adopted++;}}
+      if(rm.skips){if(!S.skips)S.skips={};for(const k in rm.skips){if(!(k in S.skips)&&!localRemovals.has(k)){S.skips[k]=rm.skips[k];adopted++;}}}
+    }catch(e){}
+    await pushToSupabase();
+    localRemovals.clear();
+    setDbStatus('ok','Saved');lastSyncTime=Date.now();
+    if(adopted)renderDashboard();
+  }catch(e){setDbStatus('err','Save err');showBanner('Save failed: '+e.message,true);}
+  finally{pushInFlight=false;}
+  return true;
+}
+async function syncNow(){if(!CFG.sb.url||!CFG.sb.key){setDbStatus('warn','No DB');return;}if(pushInFlight)return;try{setDbStatus('spin','Syncing...');await flushPendingSave();await pullFromSupabase();pruneCompletions();setDbStatus('ok','Synced');lastSyncTime=Date.now();renderAll();renderCalendarSection();renderHaControls();fireAllWebhooks();}catch(e){setDbStatus('err','Sync err');showBanner('Sync failed: '+e.message,true);}}
+function scheduleSave(){pendingSync=true;clearTimeout(syncTimer);syncTimer=setTimeout(function(){flushPendingSave();},800);}
 async function testSupabase(){const el=document.getElementById('sbResult');el.textContent='Testing...';el.className='dp-result';try{const r=await fetch(sbUrl('homebase?limit=1'),{headers:sbHeaders()});if(r.ok){el.textContent='OK Connected!';el.className='dp-result ok';setDbStatus('ok','Connected');}else{const e=await r.json().catch(()=>({}));el.textContent='Error '+r.status+': '+(e.message||'check URL and key');el.className='dp-result err';}}catch(e){el.textContent='Error: '+e.message;el.className='dp-result err';}}
 async function forcePush(){if(!await customConfirm('Push local data to Supabase?','Push'))return;try{await pushToSupabase();showBanner('Pushed!');}catch(e){showBanner('Push failed: '+e.message,true);}}
 async function forcePull(){if(!await customConfirm('Pull from Supabase?','Pull'))return;try{await pullFromSupabase();renderAll();showBanner('Pulled!');}catch(e){showBanner('Pull failed: '+e.message,true);}}
@@ -427,10 +456,16 @@ function getTaskSections(filterMember){
     if(task.recur==='once'){overdueScanStart=task.dueDate;}
     else{const fl=awayScanFloor(t);overdueScanStart=task.createdAt&&task.createdAt>fl?task.createdAt:fl;}
     const pastDates=getDueDatesInRange(task,overdueScanStart,addDays(t,-1));
-    const misses=pastDates.filter(d=>!isCleared(task.id+'_'+d));if(misses.length){const due=misses[0];sec.overdue.push({task,due,key:task.id+'_'+due,missed:misses.length,misses:misses});}
-    // TODAY
+    const misses=pastDates.filter(d=>!isCleared(task.id+'_'+d));
     const todayDates=getDueDatesInRange(task,t,t);
-    for(const due of todayDates){const key=task.id+'_'+due;if(!sec.overdue.find(x=>x.task.id===task.id&&x.due===due))sec.today.push({task,due,key,done:!!S.completions[key]});}
+    if(todayDates.length){
+      // due today: one card, carrying any backlog with it
+      const due=todayDates[0],key=task.id+'_'+due;
+      sec.today.push({task,due,key,done:!!S.completions[key],missed:misses.length});
+    }else if(misses.length){
+      const due=misses[0];
+      sec.overdue.push({task,due,key:task.id+'_'+due,missed:misses.length,misses:misses});
+    }
     // UPCOMING (only if lead time > 0)
     if(lt>0){for(let i=1;i<=lt;i++){const futureDate=addDays(t,i);const futureDates=getDueDatesInRange(task,futureDate,futureDate);for(const due of futureDates){const key=task.id+'_'+due;if(!isCleared(key)&&!sec.overdue.find(x=>x.task.id===task.id&&x.due===due)&&!sec.today.find(x=>x.task.id===task.id&&x.due===due)&&!sec.upcoming.find(x=>x.task.id===task.id&&x.due===due))sec.upcoming.push({task,due,key});}}}
   });
@@ -442,11 +477,12 @@ function getTaskSections(filterMember){
 // HOME ASSISTANT WEBHOOKS
 const OVERDUE_WH='homebase_overdue';
 function whId(mid){return 'homebase_member_'+mid;}
-function buildMemberPayload(mid){const sec=getTaskSections(mid);const m=S.members.find(x=>x.id===mid);const aw=isAway();return{member_id:mid,member_name:m?m.name:'?',away:aw,has_tasks_today:sec.today.filter(x=>!x.done).length>0,has_overdue:aw?false:sec.overdue.length>0,tasks_today_count:sec.today.filter(x=>!x.done).length,overdue_count:aw?0:sec.overdue.length,tasks_today:sec.today.filter(x=>!x.done).map(x=>x.task.name),overdue_tasks:aw?[]:sec.overdue.map(x=>x.task.name),timestamp:new Date().toISOString()};}
-function buildOverduePayload(){const sec=getTaskSections(null);if(isAway())return{has_overdue:false,overdue_count:0,overdue_tasks:[],away:true,timestamp:new Date().toISOString()};return{has_overdue:sec.overdue.length>0,away:false,overdue_count:sec.overdue.length,overdue_tasks:sec.overdue.map(x=>({name:x.task.name,assignee:x.task.assignee?(S.members.find(m=>m.id===x.task.assignee)?.name||'?'):'Anyone',due:friendlyDate(x.due)})),timestamp:new Date().toISOString()};}
+function overdueCount(sec){return sec.overdue.length+sec.today.filter(function(x){return !x.done&&(x.missed||0)>0;}).length;}
+function buildMemberPayload(mid){const sec=getTaskSections(mid);const m=S.members.find(x=>x.id===mid);const aw=isAway();const oc=overdueCount(sec);return{member_id:mid,member_name:m?m.name:'?',away:aw,has_tasks_today:sec.today.filter(x=>!x.done).length>0,has_overdue:aw?false:oc>0,tasks_today_count:sec.today.filter(x=>!x.done).length,overdue_count:aw?0:oc,tasks_today:sec.today.filter(x=>!x.done).map(x=>x.task.name),overdue_tasks:aw?[]:sec.overdue.map(x=>x.task.name),timestamp:new Date().toISOString()};}
+function buildOverduePayload(){const sec=getTaskSections(null);if(isAway())return{has_overdue:false,overdue_count:0,overdue_tasks:[],away:true,timestamp:new Date().toISOString()};const late=sec.overdue.concat(sec.today.filter(function(x){return !x.done&&(x.missed||0)>0;}));return{has_overdue:late.length>0,away:false,overdue_count:late.length,overdue_tasks:late.map(x=>({name:x.task.name,assignee:x.task.assignee?(S.members.find(m=>m.id===x.task.assignee)?.name||'?'):'Anyone',due:friendlyDate(x.due)})),timestamp:new Date().toISOString()};}
 async function postWh(id,payload){const base=(CFG.ha.url||'').replace(/\/$/,'');if(!base)return null;const headers={'Content-Type':'application/json'};if(CFG.ha.token)headers['Authorization']='Bearer '+CFG.ha.token;const r=await fetch(base+'/api/webhook/'+id,{method:'POST',headers,body:JSON.stringify(payload)});return r.ok;}
 let lastWHfp=null;
-async function fireAllWebhooks(force=false){if(!CFG.ha.url)return;const sec=getTaskSections(null);const fp=JSON.stringify({o:sec.overdue.map(x=>x.key),t:sec.today.filter(x=>!x.done).map(x=>x.key)});if(!force&&fp===lastWHfp)return;lastWHfp=fp;const members=S.members.length?S.members:[];let allOk=true;for(const m of members){try{const ok=await postWh(whId(m.id),buildMemberPayload(m.id));if(!ok)allOk=false;}catch(e){allOk=false;}}try{const ok=await postWh(OVERDUE_WH,buildOverduePayload());if(!ok)allOk=false;}catch(e){allOk=false;}const dot=document.getElementById('haDot'),txt=document.getElementById('haTxt');if(members.length){dot.className='dot '+(allOk?'ok':'err');txt.textContent=allOk?'HA ok':'HA err';}const r=document.getElementById('haResult');if(r){r.textContent=allOk?(members.length+1)+' webhooks fired':'Some failed';r.className='dp-result '+(allOk?'ok':'err');}}
+async function fireAllWebhooks(force=false){if(!CFG.ha.url)return;const sec=getTaskSections(null);const fp=JSON.stringify({o:sec.overdue.map(x=>x.key),t:sec.today.filter(x=>!x.done).map(x=>x.key+':'+(x.missed||0))});if(!force&&fp===lastWHfp)return;lastWHfp=fp;const members=S.members.length?S.members:[];let allOk=true;for(const m of members){try{const ok=await postWh(whId(m.id),buildMemberPayload(m.id));if(!ok)allOk=false;}catch(e){allOk=false;}}try{const ok=await postWh(OVERDUE_WH,buildOverduePayload());if(!ok)allOk=false;}catch(e){allOk=false;}const dot=document.getElementById('haDot'),txt=document.getElementById('haTxt');if(members.length){dot.className='dot '+(allOk?'ok':'err');txt.textContent=allOk?'HA ok':'HA err';}const r=document.getElementById('haResult');if(r){r.textContent=allOk?(members.length+1)+' webhooks fired':'Some failed';r.className='dp-result '+(allOk?'ok':'err');}}
 function updateHaStatus(){const dot=document.getElementById('haDot'),txt=document.getElementById('haTxt');dot.className='dot '+(CFG.ha.url?'warn':'');txt.textContent=CFG.ha.url?'HA ready':'HA';}
 async function testHa(){const el=document.getElementById('haResult');el.textContent='Testing...';el.className='dp-result';try{const r=await fetch(CFG.ha.url.replace(/\/$/,'')+'/api/',{headers:{'Authorization':'Bearer '+CFG.ha.token}});if(r.ok){el.textContent='Connected!';el.className='dp-result ok';document.getElementById('haDot').className='dot ok';document.getElementById('haTxt').textContent='HA ok';}else{el.textContent='HTTP '+r.status;el.className='dp-result err';}}catch(e){el.textContent=e.message;el.className='dp-result err';}}
 function saveHaSettings(){CFG.ha.url=(document.getElementById('haUrl').value||'').trim();CFG.ha.token=(document.getElementById('haToken').value||'').trim();saveCfg();updateHaStatus();}
@@ -563,8 +599,32 @@ function renderHaTab(){document.getElementById('haUrl').value=CFG.ha.url||'';doc
 // RENDER DASHBOARD
 function getMember(id){return S.members.find(m=>m.id===id);}
 function recurDesc(task){if(task.recur==='once')return'One-off \u00b7 '+niceDate(task.dueDate);if(task.recur==='weekly')return'Every '+DOW[task.dowIndex];if(task.recur==='monthly')return'Monthly on '+ordinal(task.domIndex);if(task.recur==='yearly')return'Yearly \u00b7 '+niceDate(task.yearlyDate);if(task.recur==='custom')return'Every '+task.intervalDays+' days';if(task.recur==='xweekly')return'Every '+task.intervalWeeks+' week'+(task.intervalWeeks>1?'s':'')+' on '+DOW[task.dowIndex];return'';}
-function renderTaskCard(item,type){const{task,due,key}=item,done=!!S.completions[key];const member=task.assignee?getMember(task.assignee):null;const diff=diffDays(today(),due);let tc='tag-upcoming',tl=friendlyDate(due);if(type==='overdue'){tc='tag-overdue';tl=overdueLabel(due,item.missed);}else if(diff===0){tc='tag-today';tl='Due Today';}else if(diff>0){tc='tag-upcoming';tl=friendlyDateFull(due);}const click=(type==='overdue')?('toggleOverdue(\''+task.id+'\',\''+key+'\')'):('toggleDone(\''+key+'\')');return'<div class="task-card '+type+' '+(done?'done':'')+'" id="card-'+key.replace(/[^a-zA-Z0-9_-]/g,'')+'"><div class="check '+(done?'checked':'')+'" onclick="'+click+'"></div><div class="task-info"><div class="task-name">'+(task.emoji?task.emoji+' ':'')+esc(task.name)+'</div><div class="task-meta"><span class="tag '+tc+'">'+tl+'</span><span class="task-recur">'+recurDesc(task)+'</span>'+(member?'<span class="assignee-tag" style="background:'+member.color+'22;color:'+member.color+'">'+esc(member.name)+'</span>':'')+(task.notes?'<span class="task-note-text">'+esc(task.notes)+'</span>':'')+'</div></div><div class="card-actions"><div class="icon-btn" onclick="editTask(\''+task.id+'\')">\u270f\ufe0f</div><div class="icon-btn" onclick="deleteTask(\''+task.id+'\')">\ud83d\uddd1\ufe0f</div></div></div>';}
-function renderDashboard(){const s=getTaskSections(UI.filter==='all'?null:UI.filter);let h='';if(!s.overdue.length&&!s.today.length&&!s.upcoming.length)h='<div class="empty-state"><div class="e-icon">\u2728</div><p>All clear \u2014 no tasks!</p></div>';if(s.overdue.length)h+='<div class="section-header"><span class="section-title">Overdue</span><span class="section-badge">'+s.overdue.length+'</span></div><div class="task-list">'+s.overdue.map(i=>renderTaskCard(i,'overdue')).join('')+'</div>';if(s.today.length)h+='<div class="section-header"><span class="section-title">Today</span><span class="section-badge">'+s.today.length+'</span></div><div class="task-list">'+s.today.map(i=>renderTaskCard(i,'today')).join('')+'</div>';if(s.upcoming.length)h+='<div class="section-header"><span class="section-title">Upcoming</span><span class="section-badge">'+s.upcoming.length+'</span></div><div class="task-list">'+s.upcoming.map(i=>renderTaskCard(i,'upcoming')).join('')+'</div>';document.getElementById('dashboardContent').innerHTML=h;}
+function renderTaskCard(item,type){const{task,due,key}=item,done=!!S.completions[key];const member=task.assignee?getMember(task.assignee):null;const diff=diffDays(today(),due);const missed=item.missed||0;let tc='tag-upcoming',tl=friendlyDate(due);
+  if(type==='overdue'){tc='tag-overdue';tl=overdueLabel(due,missed);}
+  else if(diff===0){if(missed>0){tc='tag-overdue';tl='Due today \u00b7 '+missed+' missed';}else{tc='tag-today';tl='Due Today';}}
+  else if(diff>0){tc='tag-upcoming';tl=friendlyDateFull(due);}
+  const click=(type==='upcoming')?('toggleDone(\''+key+'\')'):('toggleOverdue(\''+task.id+'\',\''+key+'\')');return'<div class="task-card '+type+' '+(done?'done':'')+'" id="card-'+key.replace(/[^a-zA-Z0-9_-]/g,'')+'"><div class="check '+(done?'checked':'')+'" onclick="'+click+'"></div><div class="task-info"><div class="task-name">'+(task.emoji?task.emoji+' ':'')+esc(task.name)+'</div><div class="task-meta"><span class="tag '+tc+'">'+tl+'</span><span class="task-recur">'+recurDesc(task)+'</span>'+(member?'<span class="assignee-tag" style="background:'+member.color+'22;color:'+member.color+'">'+esc(member.name)+'</span>':'')+(task.notes?'<span class="task-note-text">'+esc(task.notes)+'</span>':'')+'</div></div><div class="card-actions"><div class="icon-btn" onclick="editTask(\''+task.id+'\')">\u270f\ufe0f</div><div class="icon-btn" onclick="deleteTask(\''+task.id+'\')">\ud83d\uddd1\ufe0f</div></div></div>';}
+function dashSectionOrder(s){
+  const t=today();
+  const soon=s.upcoming.some(function(x){return diffDays(t,x.due)<=7;});
+  return soon?['today','upcoming','overdue']:['today','overdue','upcoming'];
+}
+function renderDashboard(){
+  const s=getTaskSections(UI.filter==='all'?null:UI.filter);
+  let h='';
+  if(!s.overdue.length&&!s.today.length&&!s.upcoming.length){
+    h='<div class="empty-state"><div class="e-icon">\u2728</div><p>All clear \u2014 no tasks!</p></div>';
+  }else{
+    const titles={today:'Today',overdue:'Overdue',upcoming:'Upcoming'};
+    dashSectionOrder(s).forEach(function(k){
+      const items=s[k];
+      if(!items.length)return;
+      h+='<div class="section-header"><span class="section-title">'+titles[k]+'</span><span class="section-badge">'+items.length+'</span></div>'
+        +'<div class="task-list">'+items.map(function(i){return renderTaskCard(i,k);}).join('')+'</div>';
+    });
+  }
+  document.getElementById('dashboardContent').innerHTML=h;
+}
 function renderAllTasks(){
   const el=document.getElementById('allTasksList');
   if(!S.tasks.length){el.innerHTML='<div class="empty-state"><div class="e-icon">📋</div><p>No tasks yet.</p></div>';return;}
@@ -676,7 +736,7 @@ function clearBacklog(task,tag,beforeDate){
   getDueDatesInRange(task,start,addDays(t,-1)).forEach(function(d){
     if(beforeDate&&d>beforeDate)return;
     const k=task.id+'_'+d;
-    if(!isCleared(k)){S.skips[k]=tag;n++;}
+    if(!isCleared(k)){S.skips[k]=tag;markAdded(k);n++;}
   });
   return n;
 }
@@ -688,10 +748,10 @@ function toggleOverdue(taskId,key){
   if(card)card.classList.add(wasDone?'unchecking':'checking');
   const tag='bulk:'+key;
   if(wasDone){
-    delete S.completions[key];
-    if(S.skips)Object.keys(S.skips).forEach(function(k){if(S.skips[k]===tag)delete S.skips[k];});
+    delete S.completions[key];markRemoved(key);
+    if(S.skips)Object.keys(S.skips).forEach(function(k){if(S.skips[k]===tag){delete S.skips[k];markRemoved(k);}});
   }else{
-    S.completions[key]=true;
+    S.completions[key]=true;markAdded(key);
     if(task&&clearsBacklog(task))clearBacklog(task,tag,null);
   }
   scheduleSave();
@@ -722,7 +782,7 @@ async function doneToday(id){
   setTimeout(function(){fireAllWebhooks(true);checkAutoPhotoFrame();},300);
   showBanner('Marked done'+(newStart&&nextDue?' \u00b7 next due '+niceDate(nextDue):''));
 }
-function toggleDone(key){const wasDone=!!S.completions[key];const safeId='card-'+key.replace(/[^a-zA-Z0-9_-]/g,'');const card=document.getElementById(safeId);if(card)card.classList.add(wasDone?'unchecking':'checking');if(wasDone)delete S.completions[key];else S.completions[key]=true;scheduleSave();setTimeout(()=>{renderDashboard();fireAllWebhooks(true);checkAutoPhotoFrame();},350);}
+function toggleDone(key){const wasDone=!!S.completions[key];const safeId='card-'+key.replace(/[^a-zA-Z0-9_-]/g,'');const card=document.getElementById(safeId);if(card)card.classList.add(wasDone?'unchecking':'checking');if(wasDone){delete S.completions[key];markRemoved(key);}else{S.completions[key]=true;markAdded(key);}scheduleSave();setTimeout(()=>{renderDashboard();fireAllWebhooks(true);checkAutoPhotoFrame();},350);}
 function setFilter(val){UI.filter=val;renderFilterChips();renderDashboard();}
 
 // NAVIGATION
